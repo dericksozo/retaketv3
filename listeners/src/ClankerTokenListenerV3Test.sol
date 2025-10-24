@@ -2,7 +2,7 @@
 pragma solidity ^0.8.26;
 
 import "sim-idx-generated/Generated.sol";
-import "./interfaces/IClankerTokenV4_0.sol";
+import "./interfaces/IClankerTokenV3_1.sol";
 import "./interfaces/IV4Quoter.sol";
 import "./interfaces/IUniswapV3Pool.sol";
 import "./lib/MulDiv.sol";
@@ -41,12 +41,13 @@ contract ClankerTokenListenerV3Test is ClankerTokenV3_1$OnTransferEvent {
 
     event TransferV3_1(TransferData);
 
-    error NotARetaketvToken();
+    // error NotARetaketvToken();
+    error NotAClankerV3_1Token();
     error AmountTooLow(uint256 amount, uint256 minAmount);
     event QuoterError(string reason);
     event QuoterLowLevelError(bytes data);
 
-    modifier onlyClankerV3_1(EventContext memory ctx) {
+    modifier onlyClankerV31(EventContext memory ctx) {
         address deployedContract = ctx.sim.getDeployer(ctx.txn.call.callee());
         if (deployedContract != CLANKER_V3_1_BASE) revert NotAClankerV3_1Token();
         _;
@@ -61,12 +62,12 @@ contract ClankerTokenListenerV3Test is ClankerTokenV3_1$OnTransferEvent {
     function onTransferEvent(
         EventContext memory ctx,
         ClankerTokenV3_1$TransferEventParams memory inputs
-    ) external override onlyClankerV3_1(ctx) {
+    ) external override onlyClankerV31(ctx) {
         // string memory tokenContext = IClankerTokenV4_0(ctx.txn.call.callee()).context();
         
         string memory tokenContext = IClankerTokenV3_1(ctx.txn.call.callee()).context();
 
-        string factoryVersion = "3.1";
+        string memory factoryVersion = "3.1";
         address deployedContract = CLANKER_V3_1_BASE;
 
         TransferData memory data = TransferData({
@@ -76,7 +77,7 @@ contract ClankerTokenListenerV3Test is ClankerTokenV3_1$OnTransferEvent {
             value: inputs.value,
             txHash: ctx.txn.hash(),
             tokenContext: tokenContext,
-            blockNumber: blockNumber(),
+            blockNumber: block.number,
             blockTimestamp: block.timestamp,
             sell: ctx.txn.call.caller() == inputs.from,
             factoryVersion: factoryVersion,
@@ -130,22 +131,6 @@ contract ClankerTokenListenerV3Test is ClankerTokenV3_1$OnTransferEvent {
             return 0;
         }
     }
-
-    // ---------- classification via Sim deployer ----------
-    function detectFactoryAndHook(
-        EventContext memory ctx,
-        address token
-    ) internal returns (address factory, uint8 version, address hook) {
-        address deployer = ctx.sim.getDeployer(token);
-        if (deployer == CLANKER_V4_0_0_BASE) {
-            return (CLANKER_V4_0_0_BASE, 4, address(0));
-        }
-        if (deployer == CLANKER_V3_1_FACTORY_BASE) {
-            return (CLANKER_V3_1_FACTORY_BASE, 3, address(0));
-        }
-        return (address(0), 0, address(0));
-    }
-
 
     // (removed: helper lookups for v4 hook)
 
