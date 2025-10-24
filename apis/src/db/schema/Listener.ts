@@ -3,11 +3,26 @@ import { pgEnum } from "drizzle-orm/pg-core";
 import * as t from "drizzle-orm/pg-core";
 import { db, types, table } from "@duneanalytics/sim-idx";
 
-export const poolCreated = table("pool_created", {
-  chainId: db.uint64('chain_id'),
-  caller: db.address('caller'),
-  pool: db.address('pool'),
-  token0: db.address('token0'),
-  token1: db.address('token1'),
-  fee: db.uint24('fee'),
+export const quoterError = table("quoter_error", {
+  reason: t.text('reason'),
+})
+
+export const quoterLowLevelError = table("quoter_low_level_error", {
+  data: db.bytes('data'),
+})
+
+export const transfer = table("transfer", {
+  fromAddress: db.address('from_address'),
+  toAddress: db.address('to_address'),
+  token: db.address('token'),
+  factory: db.address('factory'),
+  factoryVersion: db.uint8('factory_version'),
+  value: db.uint256('value'),
+  ethValueInWei: db.uint256('eth_value_in_wei'),
+  usdcValue: db.uint256('usdc_value'),
+  txHash: db.bytes32('tx_hash'),
+  tokenContext: t.text('token_context'),
+  blockNumber: db.uint256('block_number'),
+  blockTimestamp: db.uint256('block_timestamp'),
+  sell: t.boolean('sell'),
 })
