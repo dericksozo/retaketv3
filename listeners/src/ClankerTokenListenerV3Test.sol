@@ -39,7 +39,7 @@ contract ClankerTokenListenerV3Test is ClankerTokenV3_1$OnTransferEvent {
 
     // (removed unused local PoolKey struct)
 
-    event Transfer(TransferData);
+    event TransferV3_1(TransferData);
 
     error NotARetaketvToken();
     error AmountTooLow(uint256 amount, uint256 minAmount);
@@ -83,7 +83,7 @@ contract ClankerTokenListenerV3Test is ClankerTokenV3_1$OnTransferEvent {
             contractDeployerAddress: deployedContract
         });
 
-        emit Transfer(data);
+        emit TransferV3_1(data);
     }
 
     // ---------- PRICING HELPERS (unchanged) ----------
